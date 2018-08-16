@@ -108,7 +108,9 @@ def main():
 	
 		#wenn die letzte Entfernung mehr als 1cm von dem aktuellen Wert abweicht, mache noch eine Messung
 		#hiermit sollen größere Messabweichungen vermieden werden
-		if float(l_entfernung) - float(Mittelwert) > 1:
+		unterschied = float(l_entfernung) - float(Mittelwert)
+
+		if unterschied > 1 or unterschied < -1:
 			Mittelwert = MesseDistanz10()
 
 		# Ermittle Füllstand
