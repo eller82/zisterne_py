@@ -64,33 +64,52 @@ def MesseDistanz():
 	Distanz = (SignalLaufzeit/2) * 34350
 	
 	return [Distanz, (SignalLaufzeit*1000/2)]
+    
+def MesseDistanz10():
+	total = 0
+	count = 0
+	for i in range(0,10):
+		Ergebnis = MesseDistanz()
+		if Ergebnis[0] > leer:
+			print("Gemessene Entfernung: %.1f cm (Signallaufzeit: %.4fms)" % (Ergebnis[0], Ergebnis[1]))
+			print "Fehler in Messung"
+			break
+		else:
+			total = total + Ergebnis[0]
+			count += 1
+			print("Gemessene Entfernung: %.1f cm (Signallaufzeit: %.4fms)" % (Ergebnis[0], Ergebnis[1]))
+			time.sleep(1)
+
+	GPIO.cleanup()
+
+	# Ermittle Mittelwert
+	Mittelwert = total/count
+    
+    return Mittelwert
 
 # main function
 def main():
 	try:
 
-		total = 0
-		count = 0
-		for i in range(0,10):
-			Ergebnis = MesseDistanz()
-			if Ergebnis[0] > leer:
-				print("Gemessene Entfernung: %.1f cm (Signallaufzeit: %.4fms)" % (Ergebnis[0], Ergebnis[1]))
-				print "Fehler in Messung"
-				break
-			else:
-				total = total + Ergebnis[0]
-				count += 1
-				print("Gemessene Entfernung: %.1f cm (Signallaufzeit: %.4fms)" % (Ergebnis[0], Ergebnis[1]))
-				time.sleep(1)
-
-		GPIO.cleanup()
-
-		# Ermittle Mittelwert
-		Mittelwert = total/count
+		Mittelwert = MesseDistanz10()
 
 		print "Mittelwert: ", Mittelwert
-		#check für volle Zisterne
-                #Mittelwert = Mittelwert - 30
+        
+        #öffne die Datei mit der zuletzt ermittelten Entfernung und lese den letzten Datensatz
+        f=open('/home/pi/development/messung/entfernung.txt', 'r')
+        if f.mode == 'r':
+            lines = f.read().splitlines()
+            last_line = lines[-1]
+            ll = last_line
+        f.close
+    
+        entfernung = ll.split(";")
+        l_entfernung = entfernung[1]
+    
+        #wenn die letzte Entfernung mehr als 1cm von dem aktuellen Wert abweicht, mache noch eine Messung
+        #hiermit sollen größere Messabweichungen vermieden werden
+        if float(l_entfernung) - float(Mittelwert) > 1:
+            Mittelwert = MesseDistanz10()
 
 		# Ermittle Füllstand
 		liter_pro_cm=3.1415*100*100*1/1000  #pi * radius * radius * 1cm /1000 sonst milliliter
@@ -110,10 +129,6 @@ def main():
 		f2=open('/home/pi/development/messung/volumen.txt','a')
 		f2.write(sttime + ';' + str(round(volumen,2)) + ';\n')
 		f2.close()
- 
- 		# Übertrage Files auf remote Server zur weiteren Verarbeitung
-		f1l=open('/home/pi/development/messung/entfernung.txt','r')
-		f2l=open('/home/pi/development/messung/volumen.txt','r')
 		
 		#url = "http://192.168.2.160:3000/api/v1/posts/create"
 		url = "http://zisterne.mellentin.eu/api/v1/posts/create"
@@ -138,19 +153,6 @@ def main():
 		else:
 			print "Fehler in Berechnung"
 		
-		#cnopts = pysftp.CnOpts()
-		#cnopts.hostkeys = None    # disable host key checking.
-		#pysftp.cnopts.hostkeys.load('~/.ssh/known_host')
-		
-		#serverftp = pysftp.Connection('melle.monoceres.uberspace.de', username ='melle', password='HO0v45RBi2XL5aT')
-		#serverftp = pysftp.Connection(host='melle.monoceres.uberspace.de', port=22, username ='melle', password='HO0v45RBi2XL5aT')
-
-		#serverftp.cwd("/home/melle/zisterne/public/")
-		#serverftp.storbinary('Stor entfernung.txt', f1l)
-		#serverftp.put('/home/pi/development/messung/entfernung.txt')
-		#serverftp.put('/home/pi/development/messung/volumen.txt')
-		#serverftp.storbinary('Stor volumen.txt', f2l)
-		#serverftp.close()
 
 	# reset GPIO settings if user pressed Ctrl+C
 	except KeyboardInterrupt:
