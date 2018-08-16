@@ -62,9 +62,9 @@ def MesseDistanz():
 	# Formel: /Signallaufzeit in Sekunden * Schallgeschwindigket in cm/s) / 2 (wg. Hin- und Rückweg des Signals)
 	SignalLaufzeit = StopZeit - StartZeit
 	Distanz = (SignalLaufzeit/2) * 34350
-	
+
 	return [Distanz, (SignalLaufzeit*1000/2)]
-    
+	
 def MesseDistanz10():
 	total = 0
 	count = 0
@@ -84,8 +84,8 @@ def MesseDistanz10():
 
 	# Ermittle Mittelwert
 	Mittelwert = total/count
-    
-    return Mittelwert
+	
+	return Mittelwert
 
 # main function
 def main():
@@ -94,22 +94,22 @@ def main():
 		Mittelwert = MesseDistanz10()
 
 		print "Mittelwert: ", Mittelwert
-        
-        #öffne die Datei mit der zuletzt ermittelten Entfernung und lese den letzten Datensatz
-        f=open('/home/pi/development/messung/entfernung.txt', 'r')
-        if f.mode == 'r':
-            lines = f.read().splitlines()
-            last_line = lines[-1]
-            ll = last_line
-        f.close
-    
-        entfernung = ll.split(";")
-        l_entfernung = entfernung[1]
-    
-        #wenn die letzte Entfernung mehr als 1cm von dem aktuellen Wert abweicht, mache noch eine Messung
-        #hiermit sollen größere Messabweichungen vermieden werden
-        if float(l_entfernung) - float(Mittelwert) > 1:
-            Mittelwert = MesseDistanz10()
+		
+		#öffne die Datei mit der zuletzt ermittelten Entfernung und lese den letzten Datensatz
+		f=open('/home/pi/development/messung/entfernung.txt', 'r')
+		if f.mode == 'r':
+			lines = f.read().splitlines()
+			last_line = lines[-1]
+			ll = last_line
+		f.close
+	
+		entfernung = ll.split(";")
+		l_entfernung = entfernung[1]
+	
+		#wenn die letzte Entfernung mehr als 1cm von dem aktuellen Wert abweicht, mache noch eine Messung
+		#hiermit sollen größere Messabweichungen vermieden werden
+		if float(l_entfernung) - float(Mittelwert) > 1:
+			Mittelwert = MesseDistanz10()
 
 		# Ermittle Füllstand
 		liter_pro_cm=3.1415*100*100*1/1000  #pi * radius * radius * 1cm /1000 sonst milliliter
@@ -125,7 +125,7 @@ def main():
 		f1.write(sttime + ';' + str(round(Mittelwert,2)) + ';\n')
 		f1.close()
  
- 		# Speichere Füllstand auf RaspberryPi
+		# Speichere Füllstand auf RaspberryPi
 		f2=open('/home/pi/development/messung/volumen.txt','a')
 		f2.write(sttime + ';' + str(round(volumen,2)) + ';\n')
 		f2.close()
