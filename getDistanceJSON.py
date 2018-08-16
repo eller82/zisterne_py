@@ -80,8 +80,6 @@ def MesseDistanz10():
 			print("Gemessene Entfernung: %.1f cm (Signallaufzeit: %.4fms)" % (Ergebnis[0], Ergebnis[1]))
 			time.sleep(1)
 
-	GPIO.cleanup()
-
 	# Ermittle Mittelwert
 	Mittelwert = total/count
 	
@@ -112,6 +110,8 @@ def main():
 
 		if unterschied > 1 or unterschied < -1:
 			Mittelwert = MesseDistanz10()
+
+		GPIO.cleanup()
 
 		# Ermittle Füllstand
 		liter_pro_cm=3.1415*100*100*1/1000  #pi * radius * radius * 1cm /1000 sonst milliliter
